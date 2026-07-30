@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guanchope Bot - Mundial 2026 Chatbot & Hub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        },
+                        stadium: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            accent: '#2563eb',
+                            gold: '#f59e0b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+
+        /* Gradient animations */
+        .gradient-text {
+            background: linear-gradient(135deg, #34d399 0%, #60a5fa 50%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .chat-bubble-bot {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-emerald-500 to-blue-600 text-white shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid font-bold text-lg fa-robot"></i>
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight flex items-center gap-2">
+                        Guanchope Bot <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-red-500 text-slate-950 font-extrabold uppercase">Mundial 2026</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Asistente Experto en la Copa Mundial FIFA 2026</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex items-center space-x-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+                <button onclick="switchTab('chat')" id="tab-chat" class="px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 bg-brand-600 text-white shadow">
+                    <i class="fa-solid fa-comments"></i> Chat IA
+                </button>
+                <button onclick="switchTab('sedes')" id="tab-sedes" class="px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fa-solid fa-stadium"></i> Sedes y Estadios
+                </button>
+                <button onclick="switchTab('formato')" id="tab-formato" class="px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fa-solid fa-trophy"></i> Formato & Cupos
+                </button>
+                <button onclick="switchTab('calendario')" id="tab-calendario" class="px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fa-solid fa-calendar-days"></i> Fechas Clave
+                </button>
+            </nav>
+
+            <!-- Quick Stats / Countdown Badge -->
+            <div class="hidden lg:flex items-center gap-3 bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-xl">
+                <i class="fa-regular fa-clock text-amber-400"></i>
+                <div class="text-right">
+                    <div id="countdown-timer" class="text-xs font-mono font-bold text-amber-400">Calculando...</div>
+                    <div class="text-[10px] text-slate-400">para el Partido Inaugural</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu Bar -->
+        <div class="flex md:hidden justify-around mt-3 pt-2 border-t border-slate-800 text-xs">
+            <button onclick="switchTab('chat')" id="mtab-chat" class="flex flex-col items-center gap-1 text-brand-500 font-semibold">
+                <i class="fa-solid fa-comments text-base"></i> Chat
+            </button>
+            <button onclick="switchTab('sedes')" id="mtab-sedes" class="flex flex-col items-center gap-1 text-slate-400">
+                <i class="fa-solid fa-stadium text-base"></i> Sedes
+            </button>
+            <button onclick="switchTab('formato')" id="mtab-formato" class="flex flex-col items-center gap-1 text-slate-400">
+                <i class="fa-solid fa-trophy text-base"></i> Formato
+            </button>
+            <button onclick="switchTab('calendario')" id="mtab-calendario" class="flex flex-col items-center gap-1 text-slate-400">
+                <i class="fa-solid fa-calendar text-base"></i> Fechas
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 flex flex-col">
+
+        <!-- VIEW 1: CHATBOT INTERFACE -->
+        <section id="view-chat" class="flex-1 flex flex-col lg:flex-row gap-6 h-[calc(100vh-160px)] min-h-[550px]">
+            <!-- Chat Container -->
+            <div class="flex-1 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-2xl relative border border-slate-800">
+                
+                <!-- Chat Header Toolbar -->
+                <div class="px-5 py-3.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-sm font-semibold text-slate-200">Guanchope Bot está en línea</span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">| Gemini 3 Flash Grounded</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="clearChatHistory()" title="Limpiar conversación" class="p-2 text-slate-400 hover:text-rose-400 transition hover:bg-slate-800 rounded-lg text-sm">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Scroll Box -->
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Welcome Bot Message -->
+                    <div class="flex gap-3 max-w-3xl">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shrink-0 shadow">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                        </div>
+                        <div class="chat-bubble-bot p-4 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-lg border border-slate-800/80">
+                            <p class="font-semibold text-brand-400 mb-1">¡Hola! Soy Guanchope Bot ⚽🤖</p>
+                            <p class="mb-2">Tu especialista en la **Copa Mundial de la FIFA 2026** (Estados Unidos, México y Canadá). Puedo responderte sobre:</p>
+                            <ul class="list-disc list-inside text-xs space-y-1 text-slate-300 mb-3">
+                                <li>Estadios, sedes y ciudades anfitrionas.</li>
+                                <li>Nuevo formato de 48 equipos y 104 partidos.</li>
+                                <li>Calendario, inauguración en el Estadio Azteca y Final en el MetLife.</li>
+                                <li>Distribución de cupos por confederaciones y eliminatorias.</li>
+                                <li>Boletos, entradas y detalles logísticos.</li>
+                            </ul>
+                            <p class="text-xs text-slate-400">Escribe cualquier duda o presiona uno de los temas sugeridos abajo.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggested Prompts / Chips -->
+                <div class="px-4 py-2.5 bg-slate-900/60 border-t border-slate-800/60 overflow-x-auto whitespace-nowrap scrollbar-none flex items-center gap-2">
+                    <span class="text-xs text-slate-400 font-medium shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Preguntar sobre:
+                    </span>
+                    <button onclick="sendQuickPrompt('¿Cuáles son las 16 sedes y estadios del Mundial 2026?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 transition shrink-0">
+                        🏟️ Sedes y Estadios
+                    </button>
+                    <button onclick="sendQuickPrompt('Explícame detalladamente cómo funciona el nuevo formato de 48 países y grupos')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 transition shrink-0">
+                        🏆 Nuevo Formato 48 equipos
+                    </button>
+                    <button onclick="sendQuickPrompt('¿Dónde y cuándo será el partido inaugural y la final del Mundial 2026?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 transition shrink-0">
+                        📍 Inauguración y Final
+                    </button>
+                    <button onclick="sendQuickPrompt('¿Cuántos cupos tiene cada confederación (CONMEBOL, UEFA, CONCACAF, etc.)?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 transition shrink-0">
+                        🌍 Cupos por Confederación
+                    </button>
+                    <button onclick="sendQuickPrompt('¿Cómo comprar boletos y cuáles son las novedades oficiales del Mundial 2026?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 transition shrink-0">
+                        🎟️ Boletos y Registro
+                    </button>
+                </div>
+
+                <!-- Chat Input Form -->
+                <div class="p-3 bg-slate-900 border-t border-slate-800">
+                    <form id="chat-form" onsubmit="handleFormSubmit(event)" class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="user-input" autocomplete="off" placeholder="Escribe tu pregunta sobre el Mundial 2026..." class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 text-sm rounded-xl pl-4 pr-10 py-3 border border-slate-800 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                            <button type="button" onclick="startVoiceInput()" title="Dictar por voz" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-400 transition">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                        </div>
+                        <button type="submit" id="send-btn" class="bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 text-white px-5 py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20 transition disabled:opacity-50">
+                            <span>Enviar</span>
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Info Side Card (Desktop) -->
+            <div class="hidden lg:flex flex-col w-80 shrink-0 gap-4">
+                <!-- Host Countries Card -->
+                <div class="glass-panel p-4 rounded-2xl border border-slate-800">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-earth-americas text-brand-400"></i> Países Anfitriones
+                    </h3>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xl">🇺🇸</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-200">Estados Unidos</div>
+                                    <div class="text-[11px] text-slate-400">11 Sedes / 78 Partidos</div>
+                                </div>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">Principal</span>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xl">🇲🇽</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-200">México</div>
+                                    <div class="text-[11px] text-slate-400">3 Sedes / 13 Partidos</div>
+                                </div>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Inauguración</span>
+                        </div>
+                        <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xl">🇨🇦</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-200">Canadá</div>
+                                    <div class="text-[11px] text-slate-400">2 Sedes / 13 Partidos</div>
+                                </div>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">Co-Anfitrión</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Card -->
+                <div class="glass-panel p-4 rounded-2xl border border-slate-800 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-simple text-amber-400"></i> Cifras Históricas
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                                <div class="text-2xl font-black text-brand-400">48</div>
+                                <div class="text-[10px] text-slate-400 uppercase">Selecciones</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                                <div class="text-2xl font-black text-blue-400">104</div>
+                                <div class="text-[10px] text-slate-400 uppercase">Partidos Totales</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                                <div class="text-2xl font-black text-amber-400">16</div>
+                                <div class="text-[10px] text-slate-400 uppercase">Estadios Top</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+                                <div class="text-2xl font-black text-rose-400">39</div>
+                                <div class="text-[10px] text-slate-400 uppercase">Días de Torneo</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700/80">
+                        <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold mb-1">
+                            <i class="fa-solid fa-circle-info"></i> ¿Sabías que?
+                        </div>
+                        <p class="text-xs text-slate-300 leading-snug">
+                            El Estadio Azteca se convertirá en el primer estadio en la historia en albergar partidos de tres copas mundiales distintas (1970, 1986 y 2026).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: SEDES Y ESTADIOS EXPLORER -->
+        <section id="view-sedes" class="hidden flex-1 space-y-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-stadium text-brand-400"></i> Las 16 Sedes del Mundial 2026
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Explora los estadios donde se disputará la mayor cita futbolística de la historia.</p>
+                </div>
+                <!-- Filter buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterStadiums('all')" class="stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-600 text-white" data-country="all">Todos (16)</button>
+                    <button onclick="filterStadiums('USA')" class="stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300" data-country="USA">🇺🇸 EE.UU. (11)</button>
+                    <button onclick="filterStadiums('MEX')" class="stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300" data-country="MEX">🇲🇽 México (3)</button>
+                    <button onclick="filterStadiums('CAN')" class="stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300" data-country="CAN">🇨🇦 Canadá (2)</button>
+                </div>
+            </div>
+
+            <div id="stadiums-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic Stadium Cards generated via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: FORMATO Y CUPOS -->
+        <section id="view-formato" class="hidden flex-1 space-y-6">
+            <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-sitemap text-blue-400"></i> Nuevo Formato de Competición (48 Equipos)
+                </h2>
+                <p class="text-slate-400 text-sm mt-1">Por primera vez en la historia, la Copa Mundial contará con 48 selecciones clasificadas.</p>
+            </div>
+
+            <!-- Format breakdown grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-xl font-bold mb-4">
+                        12
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-100 mb-2">Fase de Grupos</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Se conformarán <strong>12 grupos de 4 equipos</strong> cada uno. Cada selección jugará 3 partidos en esta primera etapa.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-bold mb-4">
+                        32
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-100 mb-2">Ronda de Dieciseisavos</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Avanzan los <strong>2 primeros de cada grupo</strong> más los <strong>8 mejores terceros</strong>, sumando una nueva ronda eliminatoria previa a octavos.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold mb-4">
+                        104
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-100 mb-2">Partidos Totales</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        El torneo pasará de 64 a <strong>104 partidos en total</strong>. El campeón disputará 8 partidos en lugar de los 7 tradicionales.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Confederation Slots Table -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-earth-americas text-emerald-400"></i> Distribución de Cupos Directos y Repesca
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="text-xs uppercase bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="py-3 px-4">Confederación</th>
+                                <th class="py-3 px-4">Región</th>
+                                <th class="py-3 px-4">Cupos Directos</th>
+                                <th class="py-3 px-4">Cupos Clasificatorios Previos</th>
+                                <th class="py-3 px-4">Diferencia vs 2022</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60">
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> UEFA
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">Europa</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">16</td>
+                                <td class="py-3.5 px-4">0 (Solo directos)</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+3</td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> CAF
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">África</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">9</td>
+                                <td class="py-3.5 px-4">1 en Torneo de Repesca</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+4</td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> AFC
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">Asia</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">8</td>
+                                <td class="py-3.5 px-4">1 en Torneo de Repesca</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+3.5</td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> CONMEBOL
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">Sudamérica</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">6</td>
+                                <td class="py-3.5 px-4">1 en Torneo de Repesca</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+1.5</td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> CONCACAF
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">Norte, Centroamérica y Caribe</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">6 (incluye 3 anfitriones)</td>
+                                <td class="py-3.5 px-4">2 en Torneo de Repesca</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+2.5</td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> OFC
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-400">Oceanía</td>
+                                <td class="py-3.5 px-4 font-semibold text-emerald-400">1</td>
+                                <td class="py-3.5 px-4">1 en Torneo de Repesca</td>
+                                <td class="py-3.5 px-4 text-emerald-400">+0.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: CALENDARIO Y FECHAS CLAVE -->
+        <section id="view-calendario" class="hidden flex-1 space-y-6">
+            <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-amber-400"></i> Cronograma de la Copa Mundial 2026
+                </h2>
+                <p class="text-slate-400 text-sm mt-1">Del 11 de junio al 19 de julio de 2026. ¡39 días de fútbol ininterrumpido!</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative border-l border-slate-800 ml-4 md:ml-8 pl-6 md:pl-8 space-y-8 py-2">
+                
+                <!-- Event 1 -->
+                <div class="relative">
+                    <span class="absolute -left-[35px] md:-left-[43px] top-0 w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xs ring-4 ring-slate-950">
+                        11
+                    </span>
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">11 de Junio de 2026</span>
+                        <h3 class="text-lg font-bold text-white mt-1">Gran Partido Inaugural</h3>
+                        <p class="text-slate-300 text-sm mt-2">
+                            El torneo arranca oficialmente en el histórico <strong>Estadio Azteca</strong> de la Ciudad de México con el debut de la Selección Mexicana.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Event 2 -->
+                <div class="relative">
+                    <span class="absolute -left-[35px] md:-left-[43px] top-0 w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-slate-950">
+                        12
+                    </span>
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                        <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">12 de Junio de 2026</span>
+                        <h3 class="text-lg font-bold text-white mt-1">Debuts de Canadá y EE.UU.</h3>
+                        <p class="text-slate-300 text-sm mt-2">
+                            Canadá debuta en Toronto (BMO Field) y Estados Unidos debuta en Los Ángeles (SoFi Stadium).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Event 3 -->
+                <div class="relative">
+                    <span class="absolute -left-[35px] md:-left-[43px] top-0 w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-slate-950">
+                        27
+                    </span>
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">28 de Junio - 3 de Julio de 2026</span>
+                        <h3 class="text-lg font-bold text-white mt-1">Ronda de Dieciseisavos (Round of 32)</h3>
+                        <p class="text-slate-300 text-sm mt-2">
+                            Inicia la fase de eliminación directa con los 32 clasificados compitiendo en partidos a vida o muerte.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Event 4 -->
+                <div class="relative">
+                    <span class="absolute -left-[35px] md:-left-[43px] top-0 w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-slate-950">
+                        04
+                    </span>
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+                        <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">4 - 7 de Julio de 2026</span>
+                        <h3 class="text-lg font-bold text-white mt-1">Octavos de Final</h3>
+                        <p class="text-slate-300 text-sm mt-2">
+                            Las 16 mejores selecciones buscan su boleto a cuartos de final. Coincide con el día de la independencia de EE.UU. en Philadelphia.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Event 5 -->
+                <div class="relative">
+                    <span class="absolute -left-[35px] md:-left-[43px] top-0 w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-xs ring-4 ring-slate-950">
+                        19
+                    </span>
+                    <div class="glass-panel p-5 rounded-2xl border border-amber-500/30">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">19 de Julio de 2026</span>
+                        <h3 class="text-xl font-bold text-amber-300 mt-1">🏆 Gran Final de la Copa Mundial</h3>
+                        <p class="text-slate-200 text-sm mt-2">
+                            El nuevo campeón del mundo se coronará en el prestigioso <strong>MetLife Stadium</strong> de New York / New Jersey ante más de 82,000 espectadores.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Stadium Data List (16 Official Venues)
+        const STADIUMS_DATA = [
+            {
+                name: "Estadio Azteca",
+                city: "Ciudad de México",
+                country: "MEX",
+                capacity: "83,264",
+                flag: "🇲🇽",
+                matches: "Partido Inaugural + Fase de Grupos y Eliminatorias",
+                img: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "MetLife Stadium",
+                city: "New York / New Jersey",
+                country: "USA",
+                capacity: "82,500",
+                flag: "🇺🇸",
+                matches: "Gran Final del Mundial 2026 + Grupos y Eliminatorias",
+                img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "AT&T Stadium",
+                city: "Dallas (Arlington), Texas",
+                country: "USA",
+                capacity: "80,000",
+                flag: "🇺🇸",
+                matches: "Semifinal + Fase de Grupos y Eliminatorias (9 partidos)",
+                img: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "SoFi Stadium",
+                city: "Los Ángeles (Inglewood), California",
+                country: "USA",
+                capacity: "70,240",
+                flag: "🇺🇸",
+                matches: "Debut de EE.UU. + Cuartos de Final y Grupos",
+                img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Mercedes-Benz Stadium",
+                city: "Atlanta, Georgia",
+                country: "USA",
+                capacity: "75,000",
+                flag: "🇺🇸",
+                matches: "Semifinal + Fase de Grupos y Eliminatorias",
+                img: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Arrowhead Stadium",
+                city: "Kansas City, Missouri",
+                country: "USA",
+                capacity: "76,416",
+                flag: "🇺🇸",
+                matches: "Cuartos de Final + Grupos",
+                img: "https://images.unsplash.com/photo-1516475429286-465d815a0df7?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "NRG Stadium",
+                city: "Houston, Texas",
+                country: "USA",
+                capacity: "72,220",
+                flag: "🇺🇸",
+                matches: "Octavos de Final + Grupos",
+                img: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Lincoln Financial Field",
+                city: "Philadelphia, Pennsylvania",
+                country: "USA",
+                capacity: "69,796",
+                flag: "🇺🇸",
+                matches: "Octavos de Final + Partido del 4 de Julio",
+                img: "https://images.unsplash.com/photo-1519766304817-4f37bda74a29?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Lumen Field",
+                city: "Seattle, Washington",
+                country: "USA",
+                capacity: "69,000",
+                flag: "🇺🇸",
+                matches: "Fase de Grupos y Dieciseisavos",
+                img: "https://images.unsplash.com/photo-1563299796-17596ed6b017?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Levi's Stadium",
+                city: "San Francisco / Bay Area",
+                country: "USA",
+                capacity: "68,500",
+                flag: "🇺🇸",
+                matches: "Fase de Grupos y Dieciseisavos",
+                img: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Gillette Stadium",
+                city: "Boston (Foxborough), Massachusetts",
+                country: "USA",
+                capacity: "65,878",
+                flag: "🇺🇸",
+                matches: "Cuartos de Final + Grupos",
+                img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Hard Rock Stadium",
+                city: "Miami, Florida",
+                country: "USA",
+                capacity: "64,767",
+                flag: "🇺🇸",
+                matches: "Partido por el 3er Puesto + Grupos",
+                img: "https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Estadio Akron",
+                city: "Guadalajara, Jalisco",
+                country: "MEX",
+                capacity: "48,071",
+                flag: "🇲🇽",
+                matches: "4 Partidos de Fase de Grupos",
+                img: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "Estadio BBVA",
+                city: "Monterrey, Nuevo León",
+                country: "MEX",
+                capacity: "53,500",
+                flag: "🇲🇽",
+                matches: "Fase de Grupos y Dieciseisavos",
+                img: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "BMO Field",
+                city: "Toronto, Ontario",
+                country: "CAN",
+                capacity: "45,736",
+                flag: "🇨🇦",
+                matches: "Debut de Canadá + Grupos y Dieciseisavos",
+                img: "https://images.unsplash.com/photo-1516475429286-465d815a0df7?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                name: "BC Place",
+                city: "Vancouver, British Columbia",
+                country: "CAN",
+                capacity: "54,500",
+                flag: "🇨🇦",
+                matches: "Fase de Grupos, Dieciseisavos y Octavos",
+                img: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?auto=format&fit=crop&w=600&q=80"
+            }
+        ];
+
+        // Chat conversation history state
+        let chatHistory = [];
+
+        const SYSTEM_PROMPT = `Tu nombre es "Guanchope Bot", un bot inteligente experto en la Copa Mundial de la FIFA 2026.
+Tus características:
+- Responde de manera entusiasta, precisa y amigable en idioma español.
+- Usas formato Markdown limpio con negritas, listas y emojis de fútbol cuando sea conveniente.
+- Conoces todos los datos oficiales del Mundial 2026:
+  * Fechas: Del 11 de junio al 19 de julio de 2026.
+  * Anfitriones: Estados Unidos (11 sedes), México (3 sedes: Cd. de México, Guadalajara, Monterrey), Canadá (2 sedes: Toronto, Vancouver). Total 16 sedes.
+  * Partido Inaugural: 11 de junio en Estadio Azteca (CDMX).
+  * Gran Final: 19 de julio en MetLife Stadium (New York/New Jersey).
+  * Formato: 48 selecciones, 12 grupos de 4. Avanzan los 2 primeros + 8 mejores terceros a Ronda de Dieciseisavos (Round of 32). Total de 104 partidos.
+  * Cupos: UEFA 16, CAF 9.5, AFC 8.5, CONMEBOL 6.5, CONCACAF 6 (incluye a EE.UU, México y Canadá) + 2 repesca, OFC 1.5.
+- Mantén respuestas ágiles y concisas pero completas. Si el usuario saluda, preséntate alegremente como Guanchope Bot.`;
+
+        // Function to render Stadium Cards
+        function renderStadiums(filter = 'all') {
+            const grid = document.getElementById('stadiums-grid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' 
+                ? STADIUMS_DATA 
+                : STADIUMS_DATA.filter(s => s.country === filter);
+
+            filtered.forEach(stadium => {
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-2xl overflow-hidden border border-slate-800 hover:border-slate-700 transition flex flex-col group";
+                card.innerHTML = `
+                    <div class="h-44 relative overflow-hidden bg-slate-900">
+                        <img src="${stadium.img}" alt="${stadium.name}" onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=${encodeURIComponent(stadium.name)}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-80">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                        <span class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur text-sm px-2.5 py-1 rounded-full border border-slate-700/60 font-semibold text-slate-200">
+                            ${stadium.flag} ${stadium.country}
+                        </span>
+                        <div class="absolute bottom-3 left-4 right-4">
+                            <h3 class="text-lg font-bold text-white leading-tight">${stadium.name}</h3>
+                            <p class="text-xs text-slate-300"><i class="fa-solid fa-location-dot text-rose-400"></i> ${stadium.city}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between space-y-3 bg-slate-900/60">
+                        <div class="flex items-center justify-between text-xs border-b border-slate-800/80 pb-2">
+                            <span class="text-slate-400">Capacidad:</span>
+                            <span class="font-bold text-brand-400 text-sm">${stadium.capacity} depectadores</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Partidos Destacados</span>
+                            <p class="text-xs text-slate-300 mt-0.5 leading-snug">${stadium.matches}</p>
+                        </div>
+                        <button onclick="sendQuickPrompt('Cuéntame detalles específicos e historia del estadio ${stadium.name} en ${stadium.city} para el Mundial 2026')" class="w-full mt-2 py-2 bg-slate-800 hover:bg-brand-600/30 hover:border-brand-500/50 border border-slate-700/60 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-robot text-brand-400"></i> Preguntar a Guanchope Bot
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterStadiums(country) {
+            document.querySelectorAll('.stadium-filter-btn').forEach(btn => {
+                if (btn.dataset.country === country) {
+                    btn.className = "stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-600 text-white shadow";
+                } else {
+                    btn.className = "stadium-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300";
+                }
+            });
+            renderStadiums(country);
+        }
+
+        function switchTab(tabId) {
+            // Hide all views
+            ['chat', 'sedes', 'formato', 'calendario'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.add('hidden');
+            });
+
+            // Reset buttons state
+            ['chat', 'sedes', 'formato', 'calendario'].forEach(id => {
+                const dtBtn = document.getElementById(`tab-${id}`);
+                const mbBtn = document.getElementById(`mtab-${id}`);
+                
+                if (dtBtn) {
+                    dtBtn.className = "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800";
+                }
+                if (mbBtn) {
+                    mbBtn.className = "flex flex-col items-center gap-1 text-slate-400";
+                }
+            });
+
+            // Show selected view
+            const targetView = document.getElementById(`view-${tabId}`);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // Highlight active button
+            const activeDtBtn = document.getElementById(`tab-${tabId}`);
+            const activeMbBtn = document.getElementById(`mtab-${tabId}`);
+            if (activeDtBtn) {
+                activeDtBtn.className = "px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 bg-brand-600 text-white shadow";
+            }
+            if (activeMbBtn) {
+                activeMbBtn.className = "flex flex-col items-center gap-1 text-brand-500 font-semibold";
+            }
+        }
+
+        function appendUserMessage(text) {
+            const container = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "flex justify-end gap-3 max-w-3xl ml-auto";
+            msgDiv.innerHTML = `
+                <div class="chat-bubble-user p-3.5 rounded-2xl rounded-tr-none text-white text-sm leading-relaxed shadow-lg">
+                    <p>${escapeHtml(text)}</p>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 shrink-0 border border-slate-700">
+                    <i class="fa-solid fa-user text-xs"></i>
+                </div>
+            `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function createTypingIndicator() {
+            const container = document.getElementById('chat-messages');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.id = "typing-indicator";
+            indicatorDiv.className = "flex gap-3 max-w-3xl";
+            indicatorDiv.innerHTML = `
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shrink-0 shadow">
+                    <i class="fa-solid fa-robot text-sm"></i>
+                </div>
+                <div class="chat-bubble-bot p-4 rounded-2xl rounded-tl-none text-slate-400 text-sm flex items-center gap-2 border border-slate-800">
+                    <i class="fa-solid fa-circle-notch animate-spin text-brand-400"></i>
+                    <span>Guanchope Bot está analizando los datos del Mundial 2026...</span>
+                </div>
+            `;
+            container.appendChild(indicatorDiv);
+            container.scrollTop = container.scrollHeight;
+            return indicatorDiv;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function appendBotMessage(text, sources = []) {
+            removeTypingIndicator();
+            const container = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "flex gap-3 max-w-3xl";
+
+            // Parse Markdown safely
+            const htmlContent = marked.parse(text);
+
+            let sourcesHtml = '';
+            if (sources && sources.length > 0) {
+                sourcesHtml = `
+                    <div class="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+                        <span class="font-semibold text-slate-300 flex items-center gap-1 mb-1">
+                            <i class="fa-solid fa-link text-brand-400"></i> Fuentes consultadas:
+                        </span>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${sources.map(s => `<a href="${s.uri}" target="_blank" rel="noopener" class="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-brand-400 border border-slate-800 transition">${escapeHtml(s.title || 'Fuente web')}</a>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            msgDiv.innerHTML = `
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shrink-0 shadow">
+                    <i class="fa-solid fa-robot text-sm"></i>
+                </div>
+                <div class="chat-bubble-bot p-4 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-lg border border-slate-800/80 max-w-full overflow-hidden">
+                    <div class="prose prose-invert prose-sm max-w-none">
+                        ${htmlContent}
+                    </div>
+                    ${sourcesHtml}
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                        <span>Guanchope Bot • Mundial 2026</span>
+                        <button onclick="speakText(this)" data-text="${escapeHtml(text)}" title="Escuchar respuesta" class="hover:text-brand-400 transition flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high"></i> Escuchar
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function callGeminiApi(userPrompt) {
+            const apiKey = ""; // Canvas injects key dynamically
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            // Add user message to local history
+            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+
+            const payload = {
+                contents: chatHistory,
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                }
+            };
+
+            try {
+                let response = null;
+                let retries = 0;
+                const maxRetries = 3;
+                
+                while (retries < maxRetries) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) break;
+                    } catch (e) {
+                        console.warn(`Attempt ${retries + 1} failed, retrying...`);
+                    }
+                    retries++;
+                    await new Promise(r => setTimeout(r, 1000 * Math.pow(2, retries)));
+                }
+
+                if (!response || !response.ok) {
+                    throw new Error("Error de conexión con la API de Gemini.");
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const botReply = candidate.content.parts[0].text;
+                    
+                    // Save bot response to history
+                    chatHistory.push(candidate.content);
+
+                    // Extract search sources if grounding used
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attr => ({
+                                uri: attr.web?.uri,
+                                title: attr.web?.title
+                            }))
+                            .filter(s => s.uri && s.title);
+                    }
+
+                    appendBotMessage(botReply, sources);
+                } else {
+                    appendBotMessage("Lo siento, no pude procesar la consulta en este momento. Por favor intenta preguntarme de nuevo.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                appendBotMessage("Ocurrió un inconveniente al conectar con el servidor de Guanchope Bot. ¡Asegúrate de tener conexión a internet e inténtalo de nuevo!");
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const inputEl = document.getElementById('user-input');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            inputEl.value = '';
+            sendUserMessage(query);
+        }
+
+        function sendQuickPrompt(promptText) {
+            switchTab('chat');
+            sendUserMessage(promptText);
+        }
+
+        function sendUserMessage(text) {
+            appendUserMessage(text);
+            createTypingIndicator();
+            callGeminiApi(text);
+        }
+
+        function clearChatHistory() {
+            chatHistory = [];
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = `
+                <div class="flex gap-3 max-w-3xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-blue-600 flex items-center justify-center text-white shrink-0 shadow">
+                        <i class="fa-solid fa-robot text-sm"></i>
+                    </div>
+                    <div class="chat-bubble-bot p-4 rounded-2xl rounded-tl-none text-slate-200 text-sm leading-relaxed shadow-lg border border-slate-800/80">
+                        <p class="font-semibold text-brand-400 mb-1">¡Historial limpiado! ⚽🤖</p>
+                        <p class="text-xs text-slate-300">¿Sobre qué otro dato del Mundial 2026 deseas consultar ahora?</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast('Reconocimiento de voz no soportado en este navegador');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.interimResults = false;
+
+            const inputEl = document.getElementById('user-input');
+            showToast('🎙️ Escuchando... Habla ahora');
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                inputEl.value = transcript;
+            };
+
+            recognition.onerror = () => {
+                showToast('Error al capturar audio de voz');
+            };
+
+            recognition.start();
+        }
+
+        function speakText(btn) {
+            const rawText = btn.getAttribute('data-text');
+            if (!rawText) return;
+
+            // Strip markdown formatting for text-to-speech
+            const cleanText = rawText.replace(/[*#_`]/g, '');
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any ongoing speech
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+                showToast('🔊 Reproduciendo voz...');
+            } else {
+                showToast('Síntesis de voz no disponible en este dispositivo');
+            }
+        }
+
+        function updateCountdown() {
+            const openingDate = new Date('2026-06-11T15:00:00Z');
+            const now = new Date();
+            const diff = openingDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown-timer').innerText = "¡EL MUNDIAL YA COMENZÓ! ⚽🏆";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+
+            document.getElementById('countdown-timer').innerText = `${days}d ${hours}h ${minutes}m`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl border border-slate-700 shadow-2xl z-50 animate-bounce";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        window.onload = function() {
+            renderStadiums('all');
+            updateCountdown();
+            setInterval(updateCountdown, 60000);
+        };
+    </script>
+</body>
+</html>
